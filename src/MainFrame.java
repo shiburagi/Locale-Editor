@@ -29,7 +29,7 @@ public class MainFrame extends JFrame {
 		// this.pack();
 		this.setMinimumSize(new Dimension((int) (800 * scale), (int) (600 * scale)));
 		this.pack();
-		this.setTitle("Locale Converter v1.0");
+		this.setTitle("Locale Editor v1.0");
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}

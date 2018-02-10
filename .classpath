@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/commons-collections4-4.1.jar"/>
 	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/commons-lang3-3.4/commons-lang3-3.4.jar"/>
 	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/material-ui-swing.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/beautyeye-3.6/dist/beautyeye_lnf.jar"/>
 	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/weblaf-complete-1.29.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
