@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -31,6 +33,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MainPanel extends JPanel {
 	private static final String SELECTED_FILE = "SELECTED_FILE";
+	private static final String SELECTED_BROWSE_FILE = "SELECTED_BROWSE_FILE";
 	private static final String SELECTED_FOLDER_SWIFT = "SELECTED_FOLDER_SWIFT";
 	private static final String SELECTED_FOLDER_ANDROID = "SELECTED_FOLDER_ANDROID";
 	Preferences prefs = Preferences.userNodeForPackage(this.getClass());
@@ -46,17 +49,21 @@ public class MainPanel extends JPanel {
 	private JButton toCSVNotAllButton;
 	private JButton toStringButton;
 
-	private JButton folderOpenInFinder;
-	private JButton fileOpenInFinder;
+	private JButton androidOpenInFinder;
+	private JButton swiftOpenInFinder;
 	private JButton fileOpen;
 	private JButton clearButton;
 
 	private JRadioButton selectFolderAndroidRadioButton;
 	private JRadioButton selectFolderSwiftRadioButton;
 
+	private JRadioButton selectFileRadioButton;
+	private JRadioButton generateFileRadioButton;
+
 	private JLabel folderAndroidLabel;
 	private JLabel folderSwiftLabel;
 	private JLabel fileLabel;
+	private JLabel generateLabel;
 
 	private JTextArea statusArea;
 
@@ -65,7 +72,10 @@ public class MainPanel extends JPanel {
 
 	private File selectedFolder = selectedAndroidFolder;
 
-	private File selectedFile = new File(prefs.get(SELECTED_FILE, ""));
+	private File selectedBrowseFile = new File(prefs.get(SELECTED_BROWSE_FILE, ""));
+	private File selectedFile = selectedBrowseFile;
+
+	private File generateFile;
 	private Thread generateExcelThread;
 	private Thread generateXmlThread;
 	private Thread generateStringThread;
@@ -76,9 +86,18 @@ public class MainPanel extends JPanel {
 		selectFolderAndroidRadioButton = new JRadioButton();
 		selectFolderSwiftRadioButton = new JRadioButton();
 
-		ButtonGroup group = new ButtonGroup();
-		group.add(selectFolderAndroidRadioButton);
-		group.add(selectFolderSwiftRadioButton);
+		selectFileRadioButton = new JRadioButton();
+		generateFileRadioButton = new JRadioButton();
+
+		generateFileRadioButton.setEnabled(false);
+
+		ButtonGroup folderGroup = new ButtonGroup();
+		folderGroup.add(selectFolderAndroidRadioButton);
+		folderGroup.add(selectFolderSwiftRadioButton);
+
+		ButtonGroup fileGroup = new ButtonGroup();
+		fileGroup.add(selectFileRadioButton);
+		fileGroup.add(generateFileRadioButton);
 
 		selectFolderAndroidButton = new JButton("select folder (Android)");
 		selectFolderSwiftButton = new JButton("select folder (Swift)");
@@ -89,8 +108,8 @@ public class MainPanel extends JPanel {
 		toCSVAllButton = new JButton("To Excel (All)");
 		toCSVNotAllButton = new JButton("To Excel (Untranslate Only)");
 
-		fileOpenInFinder = new JButton("Go to Generated File Folder");
-		folderOpenInFinder = new JButton("Go to XML/String Folder");
+		swiftOpenInFinder = new JButton("Go to String Folder");
+		androidOpenInFinder = new JButton("Go to XML Folder");
 		fileOpen = new JButton("Open generated file");
 
 		clearButton = new JButton("Clear");
@@ -101,6 +120,8 @@ public class MainPanel extends JPanel {
 		folderAndroidLabel = new JLabel(selectedAndroidFolder.getAbsolutePath());
 		folderSwiftLabel = new JLabel(selectedSwiftFolder.getAbsolutePath());
 		fileLabel = new JLabel(selectedFile.getAbsolutePath());
+		generateLabel = new JLabel();
+
 		SpringLayout layout = new SpringLayout();
 		setLayout(layout);
 		setBackground(Color.WHITE);
@@ -123,8 +144,8 @@ public class MainPanel extends JPanel {
 		add(fileLabel);
 		add(toStringButton);
 		add(toCSVNotAllButton);
-		// add(fileOpenInFinder);
-		add(folderOpenInFinder);
+		add(swiftOpenInFinder);
+		add(androidOpenInFinder);
 		add(fileOpen);
 		add(jPanel1);
 		add(jPanel2);
@@ -134,6 +155,10 @@ public class MainPanel extends JPanel {
 
 		add(selectFolderAndroidRadioButton);
 		add(selectFolderSwiftRadioButton);
+
+		add(selectFileRadioButton);
+		add(generateFileRadioButton);
+		add(generateLabel);
 
 		int pad6 = (int) (4 * frame.scale);
 		int pad7 = (int) (7 * frame.scale);
@@ -177,14 +202,29 @@ public class MainPanel extends JPanel {
 		layout.putConstraint(SpringLayout.EAST, jPanel1, -pad7, SpringLayout.EAST, this);
 		layout.putConstraint(SpringLayout.NORTH, jPanel1, pad10, SpringLayout.SOUTH, toCSVNotAllButton);
 
+		
+		layout.putConstraint(SpringLayout.WEST, selectFileRadioButton, (int) (10 * frame.scale),
+				SpringLayout.WEST, this);
+		layout.putConstraint(SpringLayout.NORTH, selectFileRadioButton, (int) (pad10+frame.scale),
+				SpringLayout.SOUTH, jPanel1);
+
+		layout.putConstraint(SpringLayout.WEST, generateFileRadioButton, (int) (10 * frame.scale),
+				SpringLayout.WEST, this);
+		layout.putConstraint(SpringLayout.NORTH, generateFileRadioButton, (int) (pad7 + frame.scale),
+				SpringLayout.SOUTH, selectFileButton);
+		
 		layout.putConstraint(SpringLayout.WEST, selectFileButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
 		layout.putConstraint(SpringLayout.NORTH, selectFileButton, pad10, SpringLayout.SOUTH, jPanel1);
 
 		layout.putConstraint(SpringLayout.WEST, fileLabel, pad7, SpringLayout.EAST, selectFileButton);
 		layout.putConstraint(SpringLayout.NORTH, fileLabel, pad6, SpringLayout.NORTH, selectFileButton);
 
+		layout.putConstraint(SpringLayout.WEST, generateLabel, pad10, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.NORTH, generateLabel, pad10, SpringLayout.SOUTH, selectFileButton);
+
+		
 		layout.putConstraint(SpringLayout.WEST, toXmlButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, toXmlButton, pad7, SpringLayout.SOUTH, selectFileButton);
+		layout.putConstraint(SpringLayout.NORTH, toXmlButton, pad10, SpringLayout.SOUTH, generateLabel);
 
 		layout.putConstraint(SpringLayout.WEST, toStringButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
 		layout.putConstraint(SpringLayout.NORTH, toStringButton, pad7, SpringLayout.SOUTH, toXmlButton);
@@ -196,26 +236,39 @@ public class MainPanel extends JPanel {
 		layout.putConstraint(SpringLayout.EAST, clearButton, (int) (-10 * frame.scale), SpringLayout.EAST, this);
 		layout.putConstraint(SpringLayout.NORTH, clearButton, pad10, SpringLayout.SOUTH, jPanel2);
 
-		layout.putConstraint(SpringLayout.WEST, folderOpenInFinder, 0, SpringLayout.EAST,
+		layout.putConstraint(SpringLayout.WEST, androidOpenInFinder, 0, SpringLayout.EAST,
 				selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, folderOpenInFinder, pad10, SpringLayout.SOUTH, jPanel2);
+		layout.putConstraint(SpringLayout.NORTH, androidOpenInFinder, pad10, SpringLayout.SOUTH, jPanel2);
 
-		// layout.putConstraint(SpringLayout.WEST, fileOpenInFinder,
-		// (int)(5*frame.scale),
-		// SpringLayout.EAST, folderOpenInFinder);
-		// layout.putConstraint(SpringLayout.NORTH, fileOpenInFinder,
-		// (int)(5*frame.scale),
-		// SpringLayout.SOUTH, jPanel2);
+		layout.putConstraint(SpringLayout.WEST, swiftOpenInFinder, pad7, SpringLayout.EAST, androidOpenInFinder);
+		layout.putConstraint(SpringLayout.NORTH, swiftOpenInFinder, pad10, SpringLayout.SOUTH, jPanel2);
 		//
 
-		layout.putConstraint(SpringLayout.WEST, fileOpen, pad7, SpringLayout.EAST, folderOpenInFinder);
+		layout.putConstraint(SpringLayout.WEST, fileOpen, pad7, SpringLayout.EAST, swiftOpenInFinder);
 		layout.putConstraint(SpringLayout.NORTH, fileOpen, pad10, SpringLayout.SOUTH, jPanel2);
 
 		layout.putConstraint(SpringLayout.WEST, jScrollPane, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
 		layout.putConstraint(SpringLayout.EAST, jScrollPane, (int) (-10 * frame.scale), SpringLayout.EAST, this);
-		layout.putConstraint(SpringLayout.NORTH, jScrollPane, pad10, SpringLayout.SOUTH, folderOpenInFinder);
+		layout.putConstraint(SpringLayout.NORTH, jScrollPane, pad10, SpringLayout.SOUTH, androidOpenInFinder);
 		layout.putConstraint(SpringLayout.SOUTH, jScrollPane, (int) (-10 * frame.scale), SpringLayout.SOUTH, this);
 
+		selectFileRadioButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				selectedFile = selectedBrowseFile;
+			}
+		});
+		
+		generateFileRadioButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				selectedFile = generateFile;
+			}
+		});
 		selectFolderAndroidRadioButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -231,6 +284,7 @@ public class MainPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				selectedFolder = selectedSwiftFolder;
+
 			}
 		});
 
@@ -312,7 +366,7 @@ public class MainPanel extends JPanel {
 						public void run() {
 							statusArea.append("Converting...\n");
 
-							TreeMap<String, String[]> map = new TreeMap<>();
+							TreeMap<String, String[]> map = toMap(selectedSwiftFolder);
 							TreeMap<String, String[]> tempMap = IO.getInstance().readExcel(selectedFile);
 
 							while (!tempMap.isEmpty()) {
@@ -353,17 +407,17 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-		fileOpenInFinder.addActionListener(new ActionListener() {
+		swiftOpenInFinder.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Desktop desktop = Desktop.getDesktop();
 				File dirToOpen = null;
 				try {
-					dirToOpen = selectedAndroidFolder;
+					dirToOpen = selectedSwiftFolder;
 					desktop.open(dirToOpen);
 				} catch (IllegalArgumentException iae) {
-					System.out.println("File Not Found");
+					JOptionPane.showMessageDialog(MainPanel.this, "Folder Not Found");
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -371,14 +425,14 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-		folderOpenInFinder.addActionListener(new ActionListener() {
+		androidOpenInFinder.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Desktop desktop = Desktop.getDesktop();
 				File dirToOpen = null;
 				try {
-					dirToOpen = selectedFolder;
+					dirToOpen = selectedAndroidFolder;
 					desktop.open(dirToOpen);
 				} catch (IllegalArgumentException iae) {
 					JOptionPane.showMessageDialog(MainPanel.this, "Folder Not Found");
@@ -399,10 +453,18 @@ public class MainPanel extends JPanel {
 		});
 
 		selectFolderAndroidRadioButton.setSelected(true);
+		selectFileRadioButton.setSelected(true);
 		// scalingFont();
 
 		setButtonColor();
+		updateGenerateFileLabel();
+	}
 
+	protected void updateGenerateFileLabel() {
+		// TODO Auto-generated method stub
+		generateLabel.setText(String.format("<html><b>Generate File : </b>%s</html>",
+				generateFile == null ? "" : generateFile.getAbsolutePath()));
+		generateFileRadioButton.setEnabled(generateFile!=null);
 	}
 
 	private void setButtonColor() {
@@ -460,7 +522,8 @@ public class MainPanel extends JPanel {
 						if (entry.getValue().length == 1) {
 							map.put(entry.getKey(), entry.getValue());
 
-						} else if (entry.getValue()[1] == null || entry.getValue()[0].equals("."))
+						} else if (entry.getValue() != null
+								&& (entry.getValue()[1] == null || ".".equals(entry.getValue()[0])))
 							map.put(entry.getKey(), entry.getValue());
 						else if (b)
 							map.put(entry.getKey(), entry.getValue());
@@ -468,11 +531,16 @@ public class MainPanel extends JPanel {
 					}
 
 					statusArea.append("Generating Excel...\n");
-
+					generateFile = IO.getInstance().writeAsExcel(new File(selectedFolder, filename), map);
 					statusArea.append("Excel created : "
-							+ IO.getInstance().writeAsExcel(new File(selectedFolder, filename), map).getAbsolutePath()
+							+ generateFile.getAbsolutePath()
 							+ "\n");
+					
+					updateGenerateFileLabel();
+					
 					generateExcelThread = null;
+					
+
 				}
 			};
 			generateExcelThread.start();
@@ -495,58 +563,57 @@ public class MainPanel extends JPanel {
 	}
 
 	protected TreeMap<String, String[]> toMap(File folder) {
-		if (folder == selectedAndroidFolder) {
-			File[] files = folder.listFiles(new FilenameFilter() {
+		File[] files;
+
+		boolean isAndroid = folder == selectedAndroidFolder;
+		if (isAndroid) {
+			files = folder.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
 					File stringFile = new File(new File(dir, name), "strings.xml");
 					return name.matches("(values)[\\-a-zA-z]*") && stringFile.exists();
 				}
 			});
-			TreeMap<String, String[]> map = new TreeMap<>();
-			int i = 0;
-			String[] labels = new String[files.length];
-			for (File file : files) {
-				labels[i++] = file.getName();
-			}
-			System.out.println(labels);
-			Arrays.sort(labels);
-			i = 0;
-			for (String label : labels) {
-				extract(new File(folder, label), map, labels.length, i++);
-			}
-			map.put(".", labels);
-			return map;
+
 		} else {
-			File[] files = folder.listFiles(new FilenameFilter() {
+			files = folder.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
 					File file = new File(dir, name);
-					return file.isDirectory()&&name.toLowerCase().endsWith(".lproj") && file.listFiles(new FilenameFilter() {
-						public boolean accept(File dir, String name) {
-							System.out.println(name);
-							return name.toLowerCase().endsWith(".strings");
-						}
-					}).length > 0;
+					return file.isDirectory() && name.toLowerCase().endsWith(".lproj")
+							&& file.listFiles(new FilenameFilter() {
+								public boolean accept(File dir, String name) {
+									System.out.println(name);
+									return name.toLowerCase().endsWith(".strings");
+								}
+							}).length > 0;
 				}
 			});
 
-			System.out.println("Files : " + files.length);
-			TreeMap<String, String[]> map = new TreeMap<>();
-			int i = 0;
-			String[] labels = new String[files.length];
-			for (File file : files) {
-				String[] split = file.getName().split("\\.");
-
-				labels[i++] = split[0].equalsIgnoreCase("Base") ? "Default" : split[0].toLowerCase();
-			}
-			System.out.println(labels);
-			Arrays.sort(labels);
-			i = 0;
-			for (String label : labels) {
-				extractString(new File(folder, label), map, labels.length, i++);
-			}
-			map.put(".", labels);
-			return map;
 		}
+
+		System.out.println("Files : " + files.length);
+		TreeMap<String, String[]> map = new TreeMap<>();
+		int i = 0;
+		TreeMap<String, File> fileMap = new TreeMap<>();
+		for (File file : files) {
+			String[] split = file.getName().split(isAndroid ? "-" : "\\.");
+			String label = isAndroid ? split.length == 1 ? "Base" : split[1] : split[0];
+			fileMap.put(label.equalsIgnoreCase("Base") ? "*Default" : label.toLowerCase(), file);
+		}
+		i = 0;
+
+		String[] labels = new String[fileMap.size()];
+		while (!fileMap.isEmpty()) {
+			Entry<String, File> entry = fileMap.pollFirstEntry();
+			File file = entry.getValue();
+			labels[i] = entry.getKey();
+			if (isAndroid) {
+				extract(file, map, labels.length, i);
+			} else
+				extractString(file, map, labels.length, i);
+			i++;
+		}
+		map.put(".", labels);
+		return map;
 	}
 
 	protected void extract(File file, TreeMap<String, String[]> map, int length, int index) {
@@ -558,6 +625,7 @@ public class MainPanel extends JPanel {
 		});
 
 		if (files.length > 0) {
+			System.out.println(files[0].getParentFile().getName());
 			List<Pair> list = IO.getInstance().readXML(files[0]);
 			for (Pair pair : list) {
 				String[] s;
@@ -582,7 +650,7 @@ public class MainPanel extends JPanel {
 		});
 
 		if (files != null && files.length > 0) {
-			List<Pair> list = IO.getInstance().readXML(files[0]);
+			List<Pair> list = IO.getInstance().readString(files[0]);
 			for (Pair pair : list) {
 				String[] s;
 				if (map.containsKey(pair.first)) {
@@ -625,9 +693,12 @@ public class MainPanel extends JPanel {
 		fileChooser.setFileFilter(filter);
 		int returnValue = fileChooser.showOpenDialog(null);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
-			selectedFile = fileChooser.getSelectedFile();
-			prefs.put(SELECTED_FILE, selectedFile.getAbsolutePath());
-			fileLabel.setText(selectedFile.getAbsolutePath());
+			selectedBrowseFile = fileChooser.getSelectedFile();
+			prefs.put(SELECTED_BROWSE_FILE, selectedBrowseFile.getAbsolutePath());
+			fileLabel.setText(selectedBrowseFile.getAbsolutePath());
+
+			if (selectFileRadioButton.isSelected())
+				selectedFile = selectedBrowseFile;
 		}
 	}
 }

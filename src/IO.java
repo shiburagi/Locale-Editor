@@ -52,7 +52,7 @@ public class IO {
 				Node node = nodeList.item(x);
 				pair.first = node.getAttributes().getNamedItem("name").getNodeValue();
 				pair.second = "";
-				System.out.println();
+				// System.out.println();
 				for (int i = 0; i < node.getChildNodes().getLength(); i++) {
 					Node node2 = node.getChildNodes().item(i);
 					if (node2.getNodeValue() != null)
@@ -61,11 +61,12 @@ public class IO {
 						pair.second += String.format("<%s>%s</%s>", node2.getNodeName(), node2.getTextContent(),
 								node2.getNodeName());
 
-					System.out.println(node2.getNodeName() + " " + node2.getTextContent() + " " + node2.getNodeType());
+					// System.out.println(node2.getNodeName() + " " +
+					// node2.getTextContent() + " " + node2.getNodeType());
 				}
 				// pair.second.repla
 
-				System.out.println(pair.first + " " + pair.second);
+				// System.out.println(pair.first + " " + pair.second);
 				list.add(pair);
 			}
 		} catch (Exception e) {
@@ -80,22 +81,33 @@ public class IO {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line;
+			StringBuilder builder = null;
 			while ((line = reader.readLine()) != null) {
 				line = line.trim();
-				if (line.startsWith("\"") && line.endsWith(";")) {
-					String []split = line.split("=", 3);
-					if(split.length>=3){
-						Pair pair = new Pair();
-						String name = split[0].trim();
-						String value = split[2].trim();
-						pair.first = name.substring(1, name.length()-1);
-						pair.second = value.substring(1, value.length()-1);
-						list.add(pair);
-						
+
+				if (line.startsWith("\"")) {
+					builder = new StringBuilder();
+				}
+				if (builder != null) {
+					builder.append(line);
+
+					if (line.endsWith(";")) {
+						String[] split = builder.toString().split("=", 2);
+						System.out.println("pass : " + split.length);
+						if (split.length >= 2) {
+							Pair pair = new Pair();
+							String name = split[0].trim();
+							String value = split[1].trim();
+							pair.first = name.substring(1, name.length() - 1);
+							pair.second = value.substring(1, value.length() - 1);
+							System.out.printf("first : %s , second : %s\n", pair.first, pair.second);
+							list.add(pair);
+
+						}
 					}
 				}
 			}
-			
+
 			reader.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -248,11 +260,13 @@ public class IO {
 		Entry<String, String[]> entry = map.pollFirstEntry();
 		while (!".".equals(entry.getKey()))
 			entry = map.pollFirstEntry();
-		String[] folderName = entry.getValue();
+		String[] folderNames = entry.getValue();
 		PrintWriter[] writers = new PrintWriter[entry.getValue().length];
 		for (int i = 0; i < writers.length; i++) {
-			System.out.println(folderName[i]);
-			File folder = new File(selectedFolder, folderName[i]);
+			System.out.println(folderNames[i]);
+			String folderName = folderNames[i].toLowerCase();
+			folderName = "values" + (folderName.contains("default") ? "" : "-" + folderName);
+			File folder = new File(selectedFolder, folderName);
 			if (!folder.exists())
 				folder.mkdirs();
 			try {
@@ -312,13 +326,15 @@ public class IO {
 		Entry<String, String[]> entry = map.pollFirstEntry();
 		while (!".".equals(entry.getKey()))
 			entry = map.pollFirstEntry();
-		String[] folderName = entry.getValue();
+		String[] folderNames = entry.getValue();
 		PrintWriter[] writers = new PrintWriter[entry.getValue().length];
 
 		for (int i = 0; i < writers.length; i++) {
-			System.out.println(folderName[i]);
-			String[] split = folderName[i].split("-");
-			File folder = new File(selectedFolder, (split.length > 1 ? split[1].toLowerCase() : "Base") + ".lproj");
+			System.out.println(folderNames[i]);
+			String folderName = folderNames[i].toLowerCase();
+			folderName = (folderName.contains("default") ? "Base" : folderName)+ ".lproj";
+
+			File folder = new File(selectedFolder, folderName );
 			if (!folder.exists())
 				folder.mkdirs();
 			try {
