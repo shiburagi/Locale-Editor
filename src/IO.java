@@ -245,9 +245,8 @@ public class IO {
 				}
 				map.put(key, list.toArray(new String[list.size()]));
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return map;
 

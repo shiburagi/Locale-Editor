@@ -339,6 +339,11 @@ public class MainPanel extends JPanel {
 							TreeMap<String, String[]> map = toMap(selectedAndroidFolder);
 							TreeMap<String, String[]> tempMap = IO.getInstance().readExcel(selectedFile);
 
+							if(tempMap.size()==0) {
+								statusArea.append("Unable to convert, Please select a valid file.");
+								return;
+							}
+								
 							while (!tempMap.isEmpty()) {
 								Entry<String, String[]> entry = tempMap.pollFirstEntry();
 								map.put(entry.getKey(), entry.getValue());
@@ -368,7 +373,10 @@ public class MainPanel extends JPanel {
 
 							TreeMap<String, String[]> map = toMap(selectedSwiftFolder);
 							TreeMap<String, String[]> tempMap = IO.getInstance().readExcel(selectedFile);
-
+							if(tempMap.size()==0) {
+								statusArea.append("Unable to convert, Please select a valid file.\n");
+								return;
+							}
 							while (!tempMap.isEmpty()) {
 								Entry<String, String[]> entry = tempMap.pollFirstEntry();
 								map.put(entry.getKey(), entry.getValue());
@@ -471,9 +479,9 @@ public class MainPanel extends JPanel {
 		// TODO Auto-generated method stub
 		Component[] components = this.getComponents();
 		for (Component component : components) {
-			if (component instanceof JButton) {
-				// component.setBackground(new Color(26,188,156));
-				// component.setForeground(Color.WHITE);
+			if (component instanceof JButton&&!OsUtils.isMac()) {
+//				 component.setBackground(new Color(26,188,156));
+//				 component.setForeground(Color.WHITE);
 			} else if (component instanceof JRadioButton) {
 				component.setBackground(Color.white);
 			}
@@ -510,8 +518,10 @@ public class MainPanel extends JPanel {
 					// TODO Auto-generated method stub
 					TreeMap<String, String[]> tempMap = toMap(selectedFolder);
 					TreeMap<String, String[]> map = new TreeMap<>();
-					if (tempMap.isEmpty())
+					if (tempMap.isEmpty()) {
+						statusArea.append("Unable to generate file. Please select a valid project folder.\n");
 						return;
+					}
 					Entry<String, String[]> entry = tempMap.pollFirstEntry();
 					map.put(entry.getKey(), entry.getValue());
 
@@ -589,8 +599,9 @@ public class MainPanel extends JPanel {
 			});
 
 		}
-
-		System.out.println("Files : " + files.length);
+		if(files==null||files.length==0) {
+			return new TreeMap<>();
+		}
 		TreeMap<String, String[]> map = new TreeMap<>();
 		int i = 0;
 		TreeMap<String, File> fileMap = new TreeMap<>();

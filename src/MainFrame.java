@@ -7,22 +7,21 @@ import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import com.alee.laf.WebLookAndFeel;
 
 public class MainFrame extends JFrame {
 	double scale = 0;
 
 	public MainFrame() {
 
-
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		double width = screenSize.getWidth();
 
-		scale = width / 1280.0;
+		// if (width >= 2000)
+		scale = Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;// / 1280.0;
+		// else
+		// scale = 1;// ;
 
-		setDefaultSize((int) (scale * 14));
+		setDefaultSize((int) (scale * 12));
 
 		Container c = getContentPane();
 		c.add(new MainPanel(this));
@@ -36,12 +35,15 @@ public class MainFrame extends JFrame {
 
 	private static void initLookAndFeel() {
 		try {
-			if (OsUtils.isMac())
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			else
-				WebLookAndFeel.install();
+			// if (OsUtils.isMac())
+			// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			UIManager.put("RootPane.setupButtonVisible", false);
+			org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();
 
-		}catch (Exception e) {
+			// else
+			// WebLookAndFeel.install();
+
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
