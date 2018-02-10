@@ -2,15 +2,15 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/poi-3.15/poi-3.15.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/poi-3.15/poi-ooxml-schemas-3.15.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/poi-3.15/poi-examples-3.15.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/poi-3.15/poi-excelant-3.15.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/poi-3.15/poi-ooxml-3.15.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/xmlbeans-2.6.0.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/commons-collections4-4.1.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/commons-lang3-3.4/commons-lang3-3.4.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/material-ui-swing.jar"/>
-	<classpathentry kind="lib" path="/Users/Shiburagi/Downloads/weblaf-complete-1.29.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections4-4.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.4.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.15.jar"/>
+	<classpathentry kind="lib" path="lib/poi-examples-3.15.jar"/>
+	<classpathentry kind="lib" path="lib/poi-excelant-3.15.jar"/>
+	<classpathentry kind="lib" path="lib/poi-ooxml-3.15.jar"/>
+	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.15.jar"/>
+	<classpathentry kind="lib" path="lib/poi-scratchpad-3.15.jar"/>
+	<classpathentry kind="lib" path="lib/weblaf-complete-1.29.jar"/>
+	<classpathentry kind="lib" path="lib/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
