@@ -591,8 +591,14 @@ public class MainPanel extends JPanel {
 		if (isAndroid) {
 			files = folder.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
-					File stringFile = new File(new File(dir, name), "strings.xml");
-					return name.matches("(values)[\\-a-zA-z]*") && stringFile.exists();
+					File file = new File(dir, name);
+					return file.isDirectory() && name.toLowerCase().startsWith("values")
+							&& file.listFiles(new FilenameFilter() {
+								public boolean accept(File dir, String name) {
+									System.out.println(name);
+									return name.toLowerCase().endsWith(".strings");
+								}
+							}).length > 0;
 				}
 			});
 
@@ -604,7 +610,7 @@ public class MainPanel extends JPanel {
 							&& file.listFiles(new FilenameFilter() {
 								public boolean accept(File dir, String name) {
 									System.out.println(name);
-									return name.toLowerCase().endsWith(".strings");
+									return name.startsWith("string")&&name.endsWith(".xml");
 								}
 							}).length > 0;
 				}
@@ -639,33 +645,37 @@ public class MainPanel extends JPanel {
 		return map;
 	}
 
-	protected void extract(File file, TreeMap<String, String[]> map, int length, int index) {
+	protected void extract(File folder, TreeMap<String, String[]> map, int length, int index) {
 		// TODO Auto-generated method stub
-		File[] files = file.listFiles(new FilenameFilter() {
+		File[] files = folder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.equals("strings.xml");
+				name = name.toLowerCase();
+				return name.startsWith("string")&&name.endsWith(".xml");
 			}
 		});
 
 		if (files.length > 0) {
 			System.out.println(files[0].getParentFile().getName());
-			List<Pair> list = IO.getInstance().readXML(files[0]);
-			for (Pair pair : list) {
-				String[] s;
-				if (map.containsKey(pair.first)) {
-					s = map.get(pair.first);
-				} else {
-					s = new String[length];
-					map.put(pair.first, s);
+			for (File file : files) {
+
+				List<Pair> list = IO.getInstance().readXML(file);
+				for (Pair pair : list) {
+					String[] s;
+					if (map.containsKey(pair.first)) {
+						s = map.get(pair.first);
+					} else {
+						s = new String[length];
+						map.put(pair.first, s);
+					}
+					s[index] = pair.second;
 				}
-				s[index] = pair.second;
 			}
 		}
 	}
 
-	protected void extractString(File file, TreeMap<String, String[]> map, int length, int index) {
+	protected void extractString(File folder, TreeMap<String, String[]> map, int length, int index) {
 		// TODO Auto-generated method stub
-		File[] files = file.listFiles(new FilenameFilter() {
+		File[] files = folder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				System.out.println(name);
 				return name.toLowerCase().endsWith(".strings");
@@ -673,16 +683,18 @@ public class MainPanel extends JPanel {
 		});
 
 		if (files != null && files.length > 0) {
-			List<Pair> list = IO.getInstance().readString(files[0]);
-			for (Pair pair : list) {
-				String[] s;
-				if (map.containsKey(pair.first)) {
-					s = map.get(pair.first);
-				} else {
-					s = new String[length];
-					map.put(pair.first, s);
+			for (File file : files) {
+				List<Pair> list = IO.getInstance().readString(file);
+				for (Pair pair : list) {
+					String[] s;
+					if (map.containsKey(pair.first)) {
+						s = map.get(pair.first);
+					} else {
+						s = new String[length];
+						map.put(pair.first, s);
+					}
+					s[index] = pair.second;
 				}
-				s[index] = pair.second;
 			}
 		}
 	}
