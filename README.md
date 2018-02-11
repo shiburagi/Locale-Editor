@@ -28,7 +28,7 @@ First, you must select the folder contains string resourse file, which,
 And then, **before start generating excel file** make sure you **choose right folder**.
 
 The are two options :
--  "To Excel (All)** : **write all text** into Excel File
+-  "To Excel (All)" : **write all text** into Excel File
 
 ![screenshot](https://github.com/shiburagi/Locale-Editor/blob/master/preview/Generating%20Excel%20All.png?raw=true)
 
