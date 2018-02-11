@@ -210,7 +210,68 @@ public class IO {
 			FileOutputStream out = new FileOutputStream(file);
 			workbook.write(out);
 			out.close();
-			System.out.println("howtodoinjava_demo.xlsx written successfully on disk.");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return file;
+	}
+
+	public File writeAsExcelWithMultiBook(File file, TreeMap<String, TreeMap<String, String[]>> allMap) {
+		// Blank workbook
+		@SuppressWarnings("resource")
+		XSSFWorkbook workbook = new XSSFWorkbook();
+
+		while (!allMap.isEmpty()) {
+			Entry<String, TreeMap<String, String[]>> entry = allMap.pollFirstEntry();
+			// Create a blank sheet
+			XSSFSheet sheet = workbook.createSheet(entry.getKey());
+
+			TreeMap<String, String[]> map = entry.getValue();
+			// Iterate over data and write to sheet
+			Set<String> keyset = map.keySet();
+
+			int rownum = 0;
+			for (String key : keyset) {
+				// create a row of excelsheet
+				Row row = sheet.createRow(rownum++);
+
+				// get object array of prerticuler key
+				String[] objArr = map.get(key);
+
+				int cellnum = 0;
+				sheet.setColumnWidth(cellnum, 5000);
+				Cell cell = row.createCell(cellnum++);
+				XSSFCellStyle style = workbook.createCellStyle();
+				style.setFillForegroundColor(HSSFColor.AQUA.index);
+				style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+				style.setAlignment(HorizontalAlignment.CENTER);
+
+				XSSFFont font = workbook.createFont();
+				font.setFontHeightInPoints((short) 12);
+				font.setBold(true);
+				style.setFont(font);
+				style.setWrapText(true);
+
+				cell.setCellValue(key);
+				cell.setCellStyle(style);
+				for (String obj : objArr) {
+					sheet.setColumnWidth(cellnum, 10000);
+					cell = row.createCell(cellnum++);
+
+					cell.setCellValue(obj);
+
+					if (rownum == 1)
+						cell.setCellStyle(style);
+
+				}
+			}
+		}
+		try {
+			// Write the workbook in file system
+			FileOutputStream out = new FileOutputStream(file);
+			workbook.write(out);
+			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -252,7 +313,46 @@ public class IO {
 
 	}
 
-	public void writeXML(File selectedFolder, TreeMap<String, String[]> map) {
+	public TreeMap<String, TreeMap<String, String[]>> readExcelWithMultiBook(File selectedFile) {
+
+		System.out.println("===============READ EXCEL=====================");
+		TreeMap<String, TreeMap<String, String[]>> allMap = new TreeMap<>();
+		try {
+			FileInputStream fis = new FileInputStream(selectedFile);
+
+			XSSFWorkbook myWorkBook = new XSSFWorkbook(fis);
+			for (int i = 0; i < myWorkBook.getNumberOfSheets(); i++) {
+
+				XSSFSheet mySheet = myWorkBook.getSheetAt(i);
+				Iterator<Row> rowIterator = mySheet.iterator();
+				TreeMap<String, String[]> map = new TreeMap<>();
+				allMap.put(mySheet.getSheetName(), map);
+				while (rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					String key = null;
+					if (cellIterator.hasNext())
+						key = cellIterator.next().getStringCellValue();
+
+					System.out.println(key);
+
+					List<String> list = new ArrayList<>();
+					while (cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						list.add(cell.getStringCellValue());
+					}
+					map.put(key, list.toArray(new String[list.size()]));
+				}
+			}
+			myWorkBook.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+		}
+		return allMap;
+
+	}
+
+	public void writeXML(String filename, File selectedFolder, TreeMap<String, String[]> map) {
 
 		System.out.println("===============WRITE XML======================");
 		// TODO Auto-generated method stub
@@ -269,7 +369,7 @@ public class IO {
 			if (!folder.exists())
 				folder.mkdirs();
 			try {
-				writers[i] = new PrintWriter(new File(folder, "strings.xml"));
+				writers[i] = new PrintWriter(new File(folder, filename==null?"strings.xml":filename+".xml"));
 				writers[i].println("<resources>");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -318,7 +418,7 @@ public class IO {
 		}
 	}
 
-	public void writeString(File selectedFolder, TreeMap<String, String[]> map) {
+	public void writeString(String filename, File selectedFolder, TreeMap<String, String[]> map) {
 
 		System.out.println("===============WRITE XML======================");
 		// TODO Auto-generated method stub
@@ -331,17 +431,15 @@ public class IO {
 		for (int i = 0; i < writers.length; i++) {
 			System.out.println(folderNames[i]);
 			String folderName = folderNames[i].toLowerCase();
-			folderName = (folderName.contains("default") ? "Base" : folderName)+ ".lproj";
+			folderName = (folderName.contains("default") ? "Base" : folderName) + ".lproj";
 
-			File folder = new File(selectedFolder, folderName );
+			File folder = new File(selectedFolder, folderName);
 			if (!folder.exists())
 				folder.mkdirs();
 			try {
 
-				writers[i] = new PrintWriter(new File(folder, "Localizable.strings"));
-				writers[i].println("/* \n" + "  Localizable.strings\n" + "  Lansuma\n" + "\n"
-						+ "  Created by Muhammad Norzariman on 08/02/2018.\n"
-						+ "  Copyright © 2018 Dattel. All rights reserved.\n" + "*/");
+				writers[i] = new PrintWriter(new File(folder, filename==null?"Localizable.strings":filename+".strings"));
+		
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
