@@ -17,16 +17,17 @@ public class MainFrame extends JFrame {
 		double width = screenSize.getWidth();
 
 		// if (width >= 2000)
-		scale = Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;// / 1280.0;
+		scale = Toolkit.getDefaultToolkit().getScreenResolution() / 72.0;// /
+																			// 1280.0;
 		// else
 		// scale = 1;// ;
 
-		setDefaultSize((int) (scale * 12));
+		setDefaultSize((int) (scale * 9));
 
 		Container c = getContentPane();
 		c.add(new MainPanel(this));
 		// this.pack();
-		this.setMinimumSize(new Dimension((int) (800 * scale), (int) (600 * scale)));
+		this.setMinimumSize(new Dimension((int) (700 * scale), (int) (400 * scale)));
 		this.pack();
 		this.setTitle("Locale Editor v1.0");
 		this.setLocationRelativeTo(null);
@@ -35,10 +36,12 @@ public class MainFrame extends JFrame {
 
 	private static void initLookAndFeel() {
 		try {
-			// if (OsUtils.isMac())
-			// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			UIManager.put("RootPane.setupButtonVisible", false);
-			org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();
+			if (OsUtils.isMac())
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			else {
+				UIManager.put("RootPane.setupButtonVisible", false);
+				org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();
+			}
 
 			// else
 			// WebLookAndFeel.install();

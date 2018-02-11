@@ -15,17 +15,19 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SpringLayout;
+import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jb2011.lnf.beautyeye.ch3_button.BEButtonUI;
@@ -49,9 +51,9 @@ public class MainPanel extends JPanel {
 	private JButton toCSVNotAllButton;
 	private JButton toStringButton;
 
-	private JButton androidOpenInFinder;
-	private JButton swiftOpenInFinder;
-	private JButton fileOpen;
+	private JButton androidOpenInFinderButton;
+	private JButton swiftOpenInFinderButton;
+	private JButton fileOpenButton;
 	private JButton clearButton;
 
 	private JRadioButton selectFolderAndroidRadioButton;
@@ -60,10 +62,10 @@ public class MainPanel extends JPanel {
 	private JRadioButton selectFileRadioButton;
 	private JRadioButton generateFileRadioButton;
 
-	private JLabel folderAndroidLabel;
-	private JLabel folderSwiftLabel;
-	private JLabel fileLabel;
-	private JLabel generateLabel;
+	private JTextField folderAndroidLabel;
+	private JTextField folderSwiftLabel;
+	private JTextField fileLabel;
+	private JTextField generateLabel;
 
 	private JTextArea statusArea;
 
@@ -79,10 +81,35 @@ public class MainPanel extends JPanel {
 	private Thread generateExcelThread;
 	private Thread generateXmlThread;
 	private Thread generateStringThread;
+	private JComponent line1;
+	private JComponent line2;
+	private JScrollPane statusAreaScrollPane;
 
 	public MainPanel(MainFrame frame) {
 		this.frame = frame;
 
+		initializeViews();
+
+		addViews();
+
+		SpringLayout layout = new SpringLayout();
+		setLayout(layout);
+		setLayoutConstraint(layout);
+		addSelectFolderAndFileListener();
+		addRadioButtonListener();
+		addGenereteButtonListener();
+		addExtraButtonListener();
+	
+		selectFolderAndroidRadioButton.setSelected(true);
+		selectFileRadioButton.setSelected(true);
+		// scalingFont();
+
+		handleUI();
+		updateGenerateFileLabel();
+	}
+	
+	private void initializeViews() {
+		// TODO Auto-generated method stub
 		selectFolderAndroidRadioButton = new JRadioButton();
 		selectFolderSwiftRadioButton = new JRadioButton();
 
@@ -108,32 +135,37 @@ public class MainPanel extends JPanel {
 		toCSVAllButton = new JButton("To Excel (All)");
 		toCSVNotAllButton = new JButton("To Excel (Untranslate Only)");
 
-		swiftOpenInFinder = new JButton("Go to String Folder");
-		androidOpenInFinder = new JButton("Go to XML Folder");
-		fileOpen = new JButton("Open generated file");
+		swiftOpenInFinderButton = new JButton("Go to String Folder");
+		androidOpenInFinderButton = new JButton("Go to XML Folder");
+		fileOpenButton = new JButton("Open generated file");
 
 		clearButton = new JButton("Clear");
 
 		statusArea = new JTextArea();
 		statusArea.setEditable(false);
 
-		folderAndroidLabel = new JLabel(selectedAndroidFolder.getAbsolutePath());
-		folderSwiftLabel = new JLabel(selectedSwiftFolder.getAbsolutePath());
-		fileLabel = new JLabel(selectedFile.getAbsolutePath());
-		generateLabel = new JLabel();
+		folderAndroidLabel = new JTextField(selectedAndroidFolder.getAbsolutePath());
+		folderSwiftLabel = new JTextField(selectedSwiftFolder.getAbsolutePath());
+		fileLabel = new JTextField(selectedFile.getAbsolutePath());
+		generateLabel = new JTextField();
 
-		SpringLayout layout = new SpringLayout();
-		setLayout(layout);
-		setBackground(Color.WHITE);
+		folderAndroidLabel.setEditable(false);
+		folderSwiftLabel.setEditable(false);
+		fileLabel.setEditable(false);
+		generateLabel.setEditable(false);
 
-		JComponent jPanel1 = drawLine();
-		jPanel1.setBackground(Color.lightGray);
 
-		JComponent jPanel2 = drawLine();
-		jPanel2.setBackground(Color.lightGray);
+		line1 = drawLine();
+		line1.setBackground(Color.lightGray);
 
-		JScrollPane jScrollPane = new JScrollPane(statusArea);
+		line2 = drawLine();
+		line2.setBackground(Color.lightGray);
 
+		statusAreaScrollPane = new JScrollPane(statusArea);
+	}
+
+	private void addViews() {
+		// TODO Auto-generated method stub
 		add(selectFolderAndroidButton);
 		add(selectFolderSwiftButton);
 		add(toXmlButton);
@@ -144,13 +176,13 @@ public class MainPanel extends JPanel {
 		add(fileLabel);
 		add(toStringButton);
 		add(toCSVNotAllButton);
-		add(swiftOpenInFinder);
-		add(androidOpenInFinder);
-		add(fileOpen);
-		add(jPanel1);
-		add(jPanel2);
+		add(swiftOpenInFinderButton);
+		add(androidOpenInFinderButton);
+		add(fileOpenButton);
+		add(line1);
+		add(line2);
 
-		add(jScrollPane);
+		add(statusAreaScrollPane);
 		add(clearButton);
 
 		add(selectFolderAndroidRadioButton);
@@ -159,150 +191,77 @@ public class MainPanel extends JPanel {
 		add(selectFileRadioButton);
 		add(generateFileRadioButton);
 		add(generateLabel);
+	}
 
-		int pad6 = (int) (4 * frame.scale);
-		int pad7 = (int) (7 * frame.scale);
-		int pad10 = (int) (10 * frame.scale);
+	private void addExtraButtonListener() {
+		// TODO Auto-generated method stub
+		fileOpenButton.addActionListener(new ActionListener() {
 
-		layout.putConstraint(SpringLayout.WEST, selectFolderAndroidRadioButton, (int) (10 * frame.scale),
-				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.NORTH, selectFolderAndroidRadioButton, (int) (11 * frame.scale),
-				SpringLayout.NORTH, this);
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Desktop desktop = Desktop.getDesktop();
+				File dirToOpen = null;
+				try {
+					dirToOpen = new File(selectedFolder, filename);
+					desktop.open(dirToOpen);
+				} catch (IllegalArgumentException iae) {
+					System.out.println("File Not Found");
+					JOptionPane.showMessageDialog(MainPanel.this, "File Not Found");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 
-		layout.putConstraint(SpringLayout.WEST, selectFolderSwiftRadioButton, (int) (10 * frame.scale),
-				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.NORTH, selectFolderSwiftRadioButton, (int) (pad7 + frame.scale),
-				SpringLayout.SOUTH, selectFolderAndroidButton);
+		swiftOpenInFinderButton.addActionListener(new ActionListener() {
 
-		layout.putConstraint(SpringLayout.WEST, selectFolderAndroidButton, 0, SpringLayout.EAST,
-				selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, selectFolderAndroidButton, (int) (10 * frame.scale),
-				SpringLayout.NORTH, this);
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Desktop desktop = Desktop.getDesktop();
+				File dirToOpen = null;
+				try {
+					dirToOpen = selectedSwiftFolder;
+					desktop.open(dirToOpen);
+				} catch (IllegalArgumentException iae) {
+					JOptionPane.showMessageDialog(MainPanel.this, "Folder Not Found");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 
-		layout.putConstraint(SpringLayout.WEST, folderAndroidLabel, pad7, SpringLayout.EAST, selectFolderAndroidButton);
-		layout.putConstraint(SpringLayout.NORTH, folderAndroidLabel, pad6, SpringLayout.NORTH,
-				selectFolderAndroidButton);
+		androidOpenInFinderButton.addActionListener(new ActionListener() {
 
-		layout.putConstraint(SpringLayout.WEST, selectFolderSwiftButton, 0, SpringLayout.EAST,
-				selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, selectFolderSwiftButton, pad7, SpringLayout.SOUTH,
-				selectFolderAndroidButton);
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Desktop desktop = Desktop.getDesktop();
+				File dirToOpen = null;
+				try {
+					dirToOpen = selectedAndroidFolder;
+					desktop.open(dirToOpen);
+				} catch (IllegalArgumentException iae) {
+					JOptionPane.showMessageDialog(MainPanel.this, "Folder Not Found");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 
-		layout.putConstraint(SpringLayout.WEST, folderSwiftLabel, pad7, SpringLayout.EAST, selectFolderSwiftButton);
-		layout.putConstraint(SpringLayout.NORTH, folderSwiftLabel, pad6, SpringLayout.NORTH, selectFolderSwiftButton);
-
-		layout.putConstraint(SpringLayout.WEST, toCSVAllButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, toCSVAllButton, pad7, SpringLayout.SOUTH, selectFolderSwiftButton);
-
-		layout.putConstraint(SpringLayout.WEST, toCSVNotAllButton, 0, SpringLayout.EAST,
-				selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, toCSVNotAllButton, pad7, SpringLayout.SOUTH, toCSVAllButton);
-
-		layout.putConstraint(SpringLayout.WEST, jPanel1, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.EAST, jPanel1, -pad7, SpringLayout.EAST, this);
-		layout.putConstraint(SpringLayout.NORTH, jPanel1, pad10, SpringLayout.SOUTH, toCSVNotAllButton);
-
-		layout.putConstraint(SpringLayout.WEST, selectFileRadioButton, (int) (10 * frame.scale), SpringLayout.WEST,
-				this);
-		layout.putConstraint(SpringLayout.NORTH, selectFileRadioButton, (int) (pad10 + frame.scale), SpringLayout.SOUTH,
-				jPanel1);
-
-		layout.putConstraint(SpringLayout.WEST, generateFileRadioButton, (int) (10 * frame.scale), SpringLayout.WEST,
-				this);
-		layout.putConstraint(SpringLayout.NORTH, generateFileRadioButton, (int) (pad7 + frame.scale),
-				SpringLayout.SOUTH, selectFileButton);
-
-		layout.putConstraint(SpringLayout.WEST, selectFileButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, selectFileButton, pad10, SpringLayout.SOUTH, jPanel1);
-
-		layout.putConstraint(SpringLayout.WEST, fileLabel, pad7, SpringLayout.EAST, selectFileButton);
-		layout.putConstraint(SpringLayout.NORTH, fileLabel, pad6, SpringLayout.NORTH, selectFileButton);
-
-		layout.putConstraint(SpringLayout.WEST, generateLabel, pad10, SpringLayout.EAST,
-				selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, generateLabel, pad10, SpringLayout.SOUTH, selectFileButton);
-
-		layout.putConstraint(SpringLayout.WEST, toXmlButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, toXmlButton, pad10, SpringLayout.SOUTH, generateLabel);
-
-		layout.putConstraint(SpringLayout.WEST, toStringButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, toStringButton, pad7, SpringLayout.SOUTH, toXmlButton);
-
-		layout.putConstraint(SpringLayout.WEST, jPanel2, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.EAST, jPanel2, -pad7, SpringLayout.EAST, this);
-		layout.putConstraint(SpringLayout.NORTH, jPanel2, pad10, SpringLayout.SOUTH, toStringButton);
-
-		layout.putConstraint(SpringLayout.EAST, clearButton, (int) (-10 * frame.scale), SpringLayout.EAST, this);
-		layout.putConstraint(SpringLayout.NORTH, clearButton, pad10, SpringLayout.SOUTH, jPanel2);
-
-		layout.putConstraint(SpringLayout.WEST, androidOpenInFinder, 0, SpringLayout.EAST,
-				selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.NORTH, androidOpenInFinder, pad10, SpringLayout.SOUTH, jPanel2);
-
-		layout.putConstraint(SpringLayout.WEST, swiftOpenInFinder, pad7, SpringLayout.EAST, androidOpenInFinder);
-		layout.putConstraint(SpringLayout.NORTH, swiftOpenInFinder, pad10, SpringLayout.SOUTH, jPanel2);
-		//
-
-		layout.putConstraint(SpringLayout.EAST, fileOpen, -pad7, SpringLayout.WEST, clearButton);
-		layout.putConstraint(SpringLayout.NORTH, fileOpen, pad10, SpringLayout.SOUTH, jPanel2);
-
-		layout.putConstraint(SpringLayout.WEST, jScrollPane, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
-		layout.putConstraint(SpringLayout.EAST, jScrollPane, (int) (-10 * frame.scale), SpringLayout.EAST, this);
-		layout.putConstraint(SpringLayout.NORTH, jScrollPane, pad10, SpringLayout.SOUTH, androidOpenInFinder);
-		layout.putConstraint(SpringLayout.SOUTH, jScrollPane, (int) (-10 * frame.scale), SpringLayout.SOUTH, this);
-
-		selectFileRadioButton.addActionListener(new ActionListener() {
+		clearButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				selectedFile = selectedBrowseFile;
+				statusArea.setText(null);
 			}
 		});
+	}
 
-		generateFileRadioButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				selectedFile = generateFile;
-			}
-		});
-		selectFolderAndroidRadioButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				selectedFolder = selectedAndroidFolder;
-			}
-		});
-
-		selectFolderSwiftRadioButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				selectedFolder = selectedSwiftFolder;
-
-			}
-		});
-
-		selectFolderAndroidButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				selectAndroidFolder();
-			}
-		});
-
-		selectFolderSwiftButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				selectSwiftFolder();
-			}
-		});
-
+	private void addGenereteButtonListener() {
+		// TODO Auto-generated method stub
 		toCSVAllButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -320,13 +279,7 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-		selectFileButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				selectFile();
-			}
-		});
+		
 		toXmlButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -394,131 +347,226 @@ public class MainPanel extends JPanel {
 
 			}
 		});
+	}
 
-		fileOpen.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Desktop desktop = Desktop.getDesktop();
-				File dirToOpen = null;
-				try {
-					dirToOpen = new File(selectedFolder, filename);
-					desktop.open(dirToOpen);
-				} catch (IllegalArgumentException iae) {
-					System.out.println("File Not Found");
-					JOptionPane.showMessageDialog(MainPanel.this, "File Not Found");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-
-		swiftOpenInFinder.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Desktop desktop = Desktop.getDesktop();
-				File dirToOpen = null;
-				try {
-					dirToOpen = selectedSwiftFolder;
-					desktop.open(dirToOpen);
-				} catch (IllegalArgumentException iae) {
-					JOptionPane.showMessageDialog(MainPanel.this, "Folder Not Found");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-
-		androidOpenInFinder.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Desktop desktop = Desktop.getDesktop();
-				File dirToOpen = null;
-				try {
-					dirToOpen = selectedAndroidFolder;
-					desktop.open(dirToOpen);
-				} catch (IllegalArgumentException iae) {
-					JOptionPane.showMessageDialog(MainPanel.this, "Folder Not Found");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-
-		clearButton.addActionListener(new ActionListener() {
+	private void addRadioButtonListener() {
+		
+		selectFileRadioButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				statusArea.setText(null);
+				selectedFile = selectedBrowseFile;
+			}
+		});
+		
+		generateFileRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				selectedFile = generateFile;
+			}
+		});
+		selectFolderAndroidRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				selectedFolder = selectedAndroidFolder;
 			}
 		});
 
-		selectFolderAndroidRadioButton.setSelected(true);
-		selectFileRadioButton.setSelected(true);
-		// scalingFont();
+		selectFolderSwiftRadioButton.addActionListener(new ActionListener() {
 
-		setButtonColor();
-		updateGenerateFileLabel();
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				selectedFolder = selectedSwiftFolder;
+
+			}
+		});
+	}
+
+	private void addSelectFolderAndFileListener() {
+	
+		selectFileButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				selectFile();
+			}
+		});
+
+		selectFolderAndroidButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				selectAndroidFolder();
+			}
+		});
+
+		selectFolderSwiftButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				selectSwiftFolder();
+			}
+		});
+
+	}
+
+	private void setLayoutConstraint(SpringLayout layout) {
+		int pad2 = (int) (3 * frame.scale);
+		int pad6 = (int) (4 * frame.scale);
+		int pad7 = (int) (7 * frame.scale);
+		int pad10 = (int) (10 * frame.scale);
+
+		layout.putConstraint(SpringLayout.WEST, selectFolderAndroidRadioButton, (int) (10 * frame.scale),
+				SpringLayout.WEST, this);
+		layout.putConstraint(SpringLayout.NORTH, selectFolderAndroidRadioButton, (int) (11 * frame.scale),
+				SpringLayout.NORTH, this);
+
+		layout.putConstraint(SpringLayout.WEST, selectFolderSwiftRadioButton, (int) (10 * frame.scale),
+				SpringLayout.WEST, this);
+		layout.putConstraint(SpringLayout.NORTH, selectFolderSwiftRadioButton, (int) (pad7 + frame.scale),
+				SpringLayout.SOUTH, selectFolderAndroidButton);
+
+		layout.putConstraint(SpringLayout.WEST, selectFolderAndroidButton, 0, SpringLayout.EAST,
+				selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, selectFolderAndroidButton, 0, SpringLayout.VERTICAL_CENTER,
+				selectFolderAndroidRadioButton);
+
+		layout.putConstraint(SpringLayout.WEST, folderAndroidLabel, pad7, SpringLayout.EAST, selectFolderAndroidButton);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, folderAndroidLabel, 0, SpringLayout.VERTICAL_CENTER,
+				selectFolderAndroidButton);
+		layout.putConstraint(SpringLayout.EAST, folderAndroidLabel, -pad7, SpringLayout.EAST, this);
+
+		layout.putConstraint(SpringLayout.WEST, selectFolderSwiftButton, 0, SpringLayout.EAST,
+				selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, selectFolderSwiftButton, 0, SpringLayout.VERTICAL_CENTER,
+				selectFolderSwiftRadioButton);
+
+		layout.putConstraint(SpringLayout.WEST, folderSwiftLabel, pad7, SpringLayout.EAST, selectFolderSwiftButton);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, folderSwiftLabel, 0, SpringLayout.VERTICAL_CENTER,
+				selectFolderSwiftButton);
+		layout.putConstraint(SpringLayout.EAST, folderSwiftLabel, -pad7, SpringLayout.EAST, this);
+
+		layout.putConstraint(SpringLayout.WEST, toCSVAllButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.NORTH, toCSVAllButton, pad7, SpringLayout.SOUTH, selectFolderSwiftButton);
+
+		layout.putConstraint(SpringLayout.WEST, toCSVNotAllButton, 0, SpringLayout.EAST,
+				selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.NORTH, toCSVNotAllButton, pad7, SpringLayout.SOUTH, toCSVAllButton);
+
+		layout.putConstraint(SpringLayout.WEST, line1, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.EAST, line1, -pad7, SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, line1, pad10, SpringLayout.SOUTH, toCSVNotAllButton);
+
+		layout.putConstraint(SpringLayout.WEST, selectFileRadioButton, (int) (10 * frame.scale), SpringLayout.WEST,
+				this);
+		layout.putConstraint(SpringLayout.NORTH, selectFileRadioButton, (int) (pad10 + frame.scale), SpringLayout.SOUTH,
+				line1);
+
+		layout.putConstraint(SpringLayout.WEST, generateFileRadioButton, (int) (10 * frame.scale), SpringLayout.WEST,
+				this);
+		layout.putConstraint(SpringLayout.NORTH, generateFileRadioButton, (int) (pad7 + frame.scale),
+				SpringLayout.SOUTH, selectFileButton);
+
+		layout.putConstraint(SpringLayout.WEST, selectFileButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, selectFileButton, 0, SpringLayout.VERTICAL_CENTER,
+				selectFileRadioButton);
+
+		layout.putConstraint(SpringLayout.WEST, fileLabel, pad7, SpringLayout.EAST, selectFileButton);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, fileLabel, 0, SpringLayout.VERTICAL_CENTER,
+				selectFileButton);
+		layout.putConstraint(SpringLayout.EAST, fileLabel, -pad7, SpringLayout.EAST, this);
+
+		layout.putConstraint(SpringLayout.WEST, generateLabel, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.EAST, generateLabel, -pad7, SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, generateLabel, 0, SpringLayout.VERTICAL_CENTER,
+				generateFileRadioButton);
+
+		layout.putConstraint(SpringLayout.WEST, toXmlButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.NORTH, toXmlButton, pad10, SpringLayout.SOUTH, generateLabel);
+
+		layout.putConstraint(SpringLayout.WEST, toStringButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.NORTH, toStringButton, pad7, SpringLayout.SOUTH, toXmlButton);
+
+		layout.putConstraint(SpringLayout.WEST, line2, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.EAST, line2, -pad7, SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, line2, pad10, SpringLayout.SOUTH, toStringButton);
+
+		layout.putConstraint(SpringLayout.EAST, clearButton, (int) (-10 * frame.scale), SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, clearButton, pad10, SpringLayout.SOUTH, line2);
+
+		layout.putConstraint(SpringLayout.WEST, androidOpenInFinderButton, 0, SpringLayout.EAST,
+				selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.NORTH, androidOpenInFinderButton, pad10, SpringLayout.SOUTH, line2);
+
+		layout.putConstraint(SpringLayout.WEST, swiftOpenInFinderButton, pad7, SpringLayout.EAST, androidOpenInFinderButton);
+		layout.putConstraint(SpringLayout.NORTH, swiftOpenInFinderButton, pad10, SpringLayout.SOUTH, line2);
+		//
+
+		layout.putConstraint(SpringLayout.EAST, fileOpenButton, -pad7, SpringLayout.WEST, clearButton);
+		layout.putConstraint(SpringLayout.NORTH, fileOpenButton, pad10, SpringLayout.SOUTH, line2);
+
+		layout.putConstraint(SpringLayout.WEST, statusAreaScrollPane, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.EAST, statusAreaScrollPane, (int) (-10 * frame.scale), SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, statusAreaScrollPane, pad10, SpringLayout.SOUTH, androidOpenInFinderButton);
+		layout.putConstraint(SpringLayout.SOUTH, statusAreaScrollPane, (int) (-10 * frame.scale), SpringLayout.SOUTH, this);
+
 	}
 
 	protected void updateGenerateFileLabel() {
 		// TODO Auto-generated method stub
-		generateLabel.setText(String.format("<html><b>Generate File : </b>%s</html>",
-				generateFile == null ? "" : generateFile.getAbsolutePath()));
+		generateLabel.setText(
+				String.format("Generate File : %s", generateFile == null ? "" : generateFile.getAbsolutePath()));
+		// generateLabel.setText(String.format("<html><b>Generate File :
+		// </b>%s</html>",
+		// generateFile == null ? "" : generateFile.getAbsolutePath()));
 		generateFileRadioButton.setEnabled(generateFile != null);
+		generateLabel.setEnabled(generateFile != null);
 	}
 
-	private void setButtonColor() {
+	private void handleUI() {
 		// TODO Auto-generated method stub
-		if (!OsUtils.isMac()) {
-			changeButtonColor(toCSVAllButton, NormalColor.blue);
-			changeButtonColor(toCSVNotAllButton, NormalColor.lightBlue);
-
-			changeButtonColor(toXmlButton, NormalColor.blue);
-			changeButtonColor(toStringButton, NormalColor.lightBlue);
-
-			changeButtonColor(fileOpen, BEButtonUI.NormalColor.green);
-			changeButtonColor(clearButton, BEButtonUI.NormalColor.red);
-		}
+		// if (!OsUtils.isMac()) {
+		// }
 		Component[] components = this.getComponents();
 		for (Component component : components) {
-			if (component instanceof JButton && !OsUtils.isMac()) {
+			if (component instanceof JButton) {
+				JButton button = (JButton) component;
 				// component.setBackground(new Color(26,188,156));
+				changeButtonColor(button, BEButtonUI.NormalColor.normal);
+				button.setForeground(Color.black);
+				button.setPreferredSize(new Dimension((int) button.getPreferredSize().getWidth() + 10,
+						(int) (button.getPreferredSize().getHeight() + 10)));
 
 			} else if (component instanceof JRadioButton) {
-				component.setBackground(Color.white);
+				component.setBackground(getBackground());
+			} else if (component instanceof JTextField) {
+				JTextField textField = (JTextField) component;
+				textField.setBorder(
+						BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.gray, 1, true),
+								BorderFactory.createEmptyBorder(2, 4, 2, 4)));
 			}
 		}
 
+		changeButtonColor(toCSVAllButton, NormalColor.blue);
+		changeButtonColor(toCSVNotAllButton, NormalColor.lightBlue);
+
+		changeButtonColor(toXmlButton, NormalColor.blue);
+		changeButtonColor(toStringButton, NormalColor.lightBlue);
+
+		changeButtonColor(fileOpenButton, BEButtonUI.NormalColor.green);
+		changeButtonColor(clearButton, BEButtonUI.NormalColor.red);
 	}
 
 	private void changeButtonColor(JButton button, NormalColor red) {
 		// TODO Auto-generated method stub
 		button.setForeground(Color.WHITE);
 		button.setUI(new BEButtonUI().setNormalColor(red));
-	}
-
-	private void scalingFont() {
-		// TODO Auto-generated method stub
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		double width = screenSize.getWidth();
-
-		double scale = width / 1280.0;
-		Font tempfont = clearButton.getFont();
-		Font font = new Font(tempfont.getName(), tempfont.getStyle(), (int) (scale * 12));
-
-		Component[] components = this.getComponents();
-		for (Component component : components) {
-			component.setFont(font);
-			System.out.println(component.getClass().getSimpleName());
-		}
-
 	}
 
 	private void generateExcelFile(boolean b) {
@@ -535,32 +583,31 @@ public class MainPanel extends JPanel {
 					TreeMap<String, String[]> map = new TreeMap<>();
 					if (tempMap.isEmpty()) {
 						statusArea.append("Unable to generate file. Please select a valid project folder.\n");
-						return;
+					} else {
+						Entry<String, String[]> entry = tempMap.pollFirstEntry();
+						map.put(entry.getKey(), entry.getValue());
+
+						while (!tempMap.isEmpty()) {
+
+							entry = tempMap.pollFirstEntry();
+							System.out.println(entry.getKey());
+							if (entry.getValue().length == 1) {
+								map.put(entry.getKey(), entry.getValue());
+
+							} else if (entry.getValue() != null
+									&& (entry.getValue()[1] == null || ".".equals(entry.getValue()[0])))
+								map.put(entry.getKey(), entry.getValue());
+							else if (b)
+								map.put(entry.getKey(), entry.getValue());
+
+						}
+
+						statusArea.append("Generating Excel...\n");
+						generateFile = IO.getInstance().writeAsExcel(new File(selectedFolder, filename), map);
+						statusArea.append("Excel created : " + generateFile.getAbsolutePath() + "\n");
+
+						updateGenerateFileLabel();
 					}
-					Entry<String, String[]> entry = tempMap.pollFirstEntry();
-					map.put(entry.getKey(), entry.getValue());
-
-					while (!tempMap.isEmpty()) {
-
-						entry = tempMap.pollFirstEntry();
-						System.out.println(entry.getKey());
-						if (entry.getValue().length == 1) {
-							map.put(entry.getKey(), entry.getValue());
-
-						} else if (entry.getValue() != null
-								&& (entry.getValue()[1] == null || ".".equals(entry.getValue()[0])))
-							map.put(entry.getKey(), entry.getValue());
-						else if (b)
-							map.put(entry.getKey(), entry.getValue());
-
-					}
-
-					statusArea.append("Generating Excel...\n");
-					generateFile = IO.getInstance().writeAsExcel(new File(selectedFolder, filename), map);
-					statusArea.append("Excel created : " + generateFile.getAbsolutePath() + "\n");
-
-					updateGenerateFileLabel();
-
 					generateExcelThread = null;
 
 				}
@@ -596,7 +643,8 @@ public class MainPanel extends JPanel {
 							&& file.listFiles(new FilenameFilter() {
 								public boolean accept(File dir, String name) {
 									System.out.println(name);
-									return name.toLowerCase().endsWith(".strings");
+									return name.startsWith("string") && name.endsWith(".xml");
+
 								}
 							}).length > 0;
 				}
@@ -610,7 +658,7 @@ public class MainPanel extends JPanel {
 							&& file.listFiles(new FilenameFilter() {
 								public boolean accept(File dir, String name) {
 									System.out.println(name);
-									return name.startsWith("string")&&name.endsWith(".xml");
+									return name.toLowerCase().endsWith(".strings");
 								}
 							}).length > 0;
 				}
@@ -647,10 +695,11 @@ public class MainPanel extends JPanel {
 
 	protected void extract(File folder, TreeMap<String, String[]> map, int length, int index) {
 		// TODO Auto-generated method stub
+		System.out.println("Extract");
 		File[] files = folder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				name = name.toLowerCase();
-				return name.startsWith("string")&&name.endsWith(".xml");
+				return name.startsWith("string") && name.endsWith(".xml");
 			}
 		});
 
@@ -684,6 +733,7 @@ public class MainPanel extends JPanel {
 
 		if (files != null && files.length > 0) {
 			for (File file : files) {
+				System.out.println(file.getAbsolutePath());
 				List<Pair> list = IO.getInstance().readString(file);
 				for (Pair pair : list) {
 					String[] s;
