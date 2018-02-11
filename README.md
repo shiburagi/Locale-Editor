@@ -10,7 +10,7 @@ Is an application to make Android / Swift translation process easier by help dev
 ## Download
 You can **download** the app here : [Locale Editor Version 1.1.2](https://github.com/shiburagi/Locale-Editor/blob/master/jar/Locale%20Editor%20v1.1.2.jar?raw=true)
 
-or, view all version via this link :
+or, view **all version** via this link :
 https://github.com/shiburagi/Locale-Editor/tree/master/jar
 
 ## Preview
