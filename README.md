@@ -7,6 +7,12 @@ Is an application to make Android / Swift translation process easier by help dev
 - Convert **Excel to Android/Swift Multi-language strings resources file**.
 - Support **multiple Excel sheet** (Convert to **multiple XML/Strings** base on **sheet name**)
 
+## Download
+You can download the app here : [Locale Editor Version 1.1.2](https://github.com/shiburagi/Locale-Editor/blob/master/jar/Locale%20Editor%20v1.1.2.jar?raw=true)
+
+or, view all version via this link :
+https://github.com/shiburagi/Locale-Editor/tree/master/jar
+
 ## Preview
 ### Windows
 ![screenshot](https://github.com/shiburagi/Locale-Editor/blob/dev_shiburagi/preview/preview-window.png?raw=true)
