@@ -27,7 +27,7 @@ public class MainFrame extends JFrame {
 		Container c = getContentPane();
 		c.add(new MainPanel(this));
 		// this.pack();
-		this.setMinimumSize(new Dimension((int) (700 * scale), (int) (400 * scale)));
+		this.setMinimumSize(new Dimension((int) (700 * scale), (int) (450 * scale)));
 		this.pack();
 		this.setTitle("Locale Editor v1.0");
 		this.setLocationRelativeTo(null);

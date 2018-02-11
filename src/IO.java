@@ -243,13 +243,14 @@ public class IO {
 				sheet.setColumnWidth(cellnum, 5000);
 				Cell cell = row.createCell(cellnum++);
 				XSSFCellStyle style = workbook.createCellStyle();
-				style.setFillForegroundColor(HSSFColor.AQUA.index);
+				style.setFillForegroundColor(HSSFColor.BLUE_GREY.index);
 				style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 				style.setAlignment(HorizontalAlignment.CENTER);
 
 				XSSFFont font = workbook.createFont();
 				font.setFontHeightInPoints((short) 12);
-				font.setBold(true);
+//				font.setBold(true);
+				font.setColor(HSSFColor.WHITE.index);
 				style.setFont(font);
 				style.setWrapText(true);
 
@@ -369,7 +370,7 @@ public class IO {
 			if (!folder.exists())
 				folder.mkdirs();
 			try {
-				writers[i] = new PrintWriter(new File(folder, filename==null?"strings.xml":filename+".xml"));
+				writers[i] = new PrintWriter(new File(folder, filename == null ? "strings.xml" : filename + ".xml"));
 				writers[i].println("<resources>");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -438,8 +439,9 @@ public class IO {
 				folder.mkdirs();
 			try {
 
-				writers[i] = new PrintWriter(new File(folder, filename==null?"Localizable.strings":filename+".strings"));
-		
+				writers[i] = new PrintWriter(
+						new File(folder, filename == null ? "Localizable.strings" : filename + ".strings"));
+
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -467,18 +469,12 @@ public class IO {
 						continue;
 
 					System.out.print(values[i] + " , ");
-					writers[i]
-							.println(
-									String.format(
-											"\"%s\" = \"%s\";", entry
-													.getKey(),
-											StringEscapeUtils
-													.escapeXml11(
-															values[i].replaceAll("\n", "\\\n").replaceAll("\r", "\\\n"))
-													.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
-													.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
-													.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
-													.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'")));
+					writers[i].println(String.format("\"%s\" = \"%s\";", entry.getKey(),
+							StringEscapeUtils.escapeXml11(values[i].replaceAll("\n", "\\\n").replaceAll("\r", "\\\n"))
+									.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
+									.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
+									.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
+									.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'")));
 				}
 				System.out.println();
 			}
