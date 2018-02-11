@@ -7,12 +7,9 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -30,6 +27,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SpringLayout;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.jb2011.lnf.beautyeye.ch3_button.BEButtonUI;
+import org.jb2011.lnf.beautyeye.ch3_button.BEButtonUI.NormalColor;
 
 public class MainPanel extends JPanel {
 	private static final String SELECTED_FILE = "SELECTED_FILE";
@@ -202,27 +202,26 @@ public class MainPanel extends JPanel {
 		layout.putConstraint(SpringLayout.EAST, jPanel1, -pad7, SpringLayout.EAST, this);
 		layout.putConstraint(SpringLayout.NORTH, jPanel1, pad10, SpringLayout.SOUTH, toCSVNotAllButton);
 
-		
-		layout.putConstraint(SpringLayout.WEST, selectFileRadioButton, (int) (10 * frame.scale),
-				SpringLayout.WEST, this);
-		layout.putConstraint(SpringLayout.NORTH, selectFileRadioButton, (int) (pad10+frame.scale),
-				SpringLayout.SOUTH, jPanel1);
+		layout.putConstraint(SpringLayout.WEST, selectFileRadioButton, (int) (10 * frame.scale), SpringLayout.WEST,
+				this);
+		layout.putConstraint(SpringLayout.NORTH, selectFileRadioButton, (int) (pad10 + frame.scale), SpringLayout.SOUTH,
+				jPanel1);
 
-		layout.putConstraint(SpringLayout.WEST, generateFileRadioButton, (int) (10 * frame.scale),
-				SpringLayout.WEST, this);
+		layout.putConstraint(SpringLayout.WEST, generateFileRadioButton, (int) (10 * frame.scale), SpringLayout.WEST,
+				this);
 		layout.putConstraint(SpringLayout.NORTH, generateFileRadioButton, (int) (pad7 + frame.scale),
 				SpringLayout.SOUTH, selectFileButton);
-		
+
 		layout.putConstraint(SpringLayout.WEST, selectFileButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
 		layout.putConstraint(SpringLayout.NORTH, selectFileButton, pad10, SpringLayout.SOUTH, jPanel1);
 
 		layout.putConstraint(SpringLayout.WEST, fileLabel, pad7, SpringLayout.EAST, selectFileButton);
 		layout.putConstraint(SpringLayout.NORTH, fileLabel, pad6, SpringLayout.NORTH, selectFileButton);
 
-		layout.putConstraint(SpringLayout.WEST, generateLabel, pad10, SpringLayout.EAST, selectFolderAndroidRadioButton);
+		layout.putConstraint(SpringLayout.WEST, generateLabel, pad10, SpringLayout.EAST,
+				selectFolderAndroidRadioButton);
 		layout.putConstraint(SpringLayout.NORTH, generateLabel, pad10, SpringLayout.SOUTH, selectFileButton);
 
-		
 		layout.putConstraint(SpringLayout.WEST, toXmlButton, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
 		layout.putConstraint(SpringLayout.NORTH, toXmlButton, pad10, SpringLayout.SOUTH, generateLabel);
 
@@ -244,7 +243,7 @@ public class MainPanel extends JPanel {
 		layout.putConstraint(SpringLayout.NORTH, swiftOpenInFinder, pad10, SpringLayout.SOUTH, jPanel2);
 		//
 
-		layout.putConstraint(SpringLayout.WEST, fileOpen, pad7, SpringLayout.EAST, swiftOpenInFinder);
+		layout.putConstraint(SpringLayout.EAST, fileOpen, -pad7, SpringLayout.WEST, clearButton);
 		layout.putConstraint(SpringLayout.NORTH, fileOpen, pad10, SpringLayout.SOUTH, jPanel2);
 
 		layout.putConstraint(SpringLayout.WEST, jScrollPane, 0, SpringLayout.EAST, selectFolderAndroidRadioButton);
@@ -253,16 +252,16 @@ public class MainPanel extends JPanel {
 		layout.putConstraint(SpringLayout.SOUTH, jScrollPane, (int) (-10 * frame.scale), SpringLayout.SOUTH, this);
 
 		selectFileRadioButton.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				selectedFile = selectedBrowseFile;
 			}
 		});
-		
+
 		generateFileRadioButton.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
@@ -339,6 +338,11 @@ public class MainPanel extends JPanel {
 							TreeMap<String, String[]> map = toMap(selectedAndroidFolder);
 							TreeMap<String, String[]> tempMap = IO.getInstance().readExcel(selectedFile);
 
+							if (tempMap.size() == 0) {
+								statusArea.append("Unable to convert, Please select a valid file.");
+								return;
+							}
+
 							while (!tempMap.isEmpty()) {
 								Entry<String, String[]> entry = tempMap.pollFirstEntry();
 								map.put(entry.getKey(), entry.getValue());
@@ -368,7 +372,10 @@ public class MainPanel extends JPanel {
 
 							TreeMap<String, String[]> map = toMap(selectedSwiftFolder);
 							TreeMap<String, String[]> tempMap = IO.getInstance().readExcel(selectedFile);
-
+							if (tempMap.size() == 0) {
+								statusArea.append("Unable to convert, Please select a valid file.\n");
+								return;
+							}
 							while (!tempMap.isEmpty()) {
 								Entry<String, String[]> entry = tempMap.pollFirstEntry();
 								map.put(entry.getKey(), entry.getValue());
@@ -464,21 +471,37 @@ public class MainPanel extends JPanel {
 		// TODO Auto-generated method stub
 		generateLabel.setText(String.format("<html><b>Generate File : </b>%s</html>",
 				generateFile == null ? "" : generateFile.getAbsolutePath()));
-		generateFileRadioButton.setEnabled(generateFile!=null);
+		generateFileRadioButton.setEnabled(generateFile != null);
 	}
 
 	private void setButtonColor() {
 		// TODO Auto-generated method stub
+		if (!OsUtils.isMac()) {
+			changeButtonColor(toCSVAllButton, NormalColor.blue);
+			changeButtonColor(toCSVNotAllButton, NormalColor.lightBlue);
+
+			changeButtonColor(toXmlButton, NormalColor.blue);
+			changeButtonColor(toStringButton, NormalColor.lightBlue);
+
+			changeButtonColor(fileOpen, BEButtonUI.NormalColor.green);
+			changeButtonColor(clearButton, BEButtonUI.NormalColor.red);
+		}
 		Component[] components = this.getComponents();
 		for (Component component : components) {
-			if (component instanceof JButton) {
+			if (component instanceof JButton && !OsUtils.isMac()) {
 				// component.setBackground(new Color(26,188,156));
-				// component.setForeground(Color.WHITE);
+
 			} else if (component instanceof JRadioButton) {
 				component.setBackground(Color.white);
 			}
 		}
 
+	}
+
+	private void changeButtonColor(JButton button, NormalColor red) {
+		// TODO Auto-generated method stub
+		button.setForeground(Color.WHITE);
+		button.setUI(new BEButtonUI().setNormalColor(red));
 	}
 
 	private void scalingFont() {
@@ -510,8 +533,10 @@ public class MainPanel extends JPanel {
 					// TODO Auto-generated method stub
 					TreeMap<String, String[]> tempMap = toMap(selectedFolder);
 					TreeMap<String, String[]> map = new TreeMap<>();
-					if (tempMap.isEmpty())
+					if (tempMap.isEmpty()) {
+						statusArea.append("Unable to generate file. Please select a valid project folder.\n");
 						return;
+					}
 					Entry<String, String[]> entry = tempMap.pollFirstEntry();
 					map.put(entry.getKey(), entry.getValue());
 
@@ -532,14 +557,11 @@ public class MainPanel extends JPanel {
 
 					statusArea.append("Generating Excel...\n");
 					generateFile = IO.getInstance().writeAsExcel(new File(selectedFolder, filename), map);
-					statusArea.append("Excel created : "
-							+ generateFile.getAbsolutePath()
-							+ "\n");
-					
+					statusArea.append("Excel created : " + generateFile.getAbsolutePath() + "\n");
+
 					updateGenerateFileLabel();
-					
+
 					generateExcelThread = null;
-					
 
 				}
 			};
@@ -569,8 +591,14 @@ public class MainPanel extends JPanel {
 		if (isAndroid) {
 			files = folder.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
-					File stringFile = new File(new File(dir, name), "strings.xml");
-					return name.matches("(values)[\\-a-zA-z]*") && stringFile.exists();
+					File file = new File(dir, name);
+					return file.isDirectory() && name.toLowerCase().startsWith("values")
+							&& file.listFiles(new FilenameFilter() {
+								public boolean accept(File dir, String name) {
+									System.out.println(name);
+									return name.toLowerCase().endsWith(".strings");
+								}
+							}).length > 0;
 				}
 			});
 
@@ -582,15 +610,16 @@ public class MainPanel extends JPanel {
 							&& file.listFiles(new FilenameFilter() {
 								public boolean accept(File dir, String name) {
 									System.out.println(name);
-									return name.toLowerCase().endsWith(".strings");
+									return name.startsWith("string")&&name.endsWith(".xml");
 								}
 							}).length > 0;
 				}
 			});
 
 		}
-
-		System.out.println("Files : " + files.length);
+		if (files == null || files.length == 0) {
+			return new TreeMap<>();
+		}
 		TreeMap<String, String[]> map = new TreeMap<>();
 		int i = 0;
 		TreeMap<String, File> fileMap = new TreeMap<>();
@@ -616,33 +645,37 @@ public class MainPanel extends JPanel {
 		return map;
 	}
 
-	protected void extract(File file, TreeMap<String, String[]> map, int length, int index) {
+	protected void extract(File folder, TreeMap<String, String[]> map, int length, int index) {
 		// TODO Auto-generated method stub
-		File[] files = file.listFiles(new FilenameFilter() {
+		File[] files = folder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.equals("strings.xml");
+				name = name.toLowerCase();
+				return name.startsWith("string")&&name.endsWith(".xml");
 			}
 		});
 
 		if (files.length > 0) {
 			System.out.println(files[0].getParentFile().getName());
-			List<Pair> list = IO.getInstance().readXML(files[0]);
-			for (Pair pair : list) {
-				String[] s;
-				if (map.containsKey(pair.first)) {
-					s = map.get(pair.first);
-				} else {
-					s = new String[length];
-					map.put(pair.first, s);
+			for (File file : files) {
+
+				List<Pair> list = IO.getInstance().readXML(file);
+				for (Pair pair : list) {
+					String[] s;
+					if (map.containsKey(pair.first)) {
+						s = map.get(pair.first);
+					} else {
+						s = new String[length];
+						map.put(pair.first, s);
+					}
+					s[index] = pair.second;
 				}
-				s[index] = pair.second;
 			}
 		}
 	}
 
-	protected void extractString(File file, TreeMap<String, String[]> map, int length, int index) {
+	protected void extractString(File folder, TreeMap<String, String[]> map, int length, int index) {
 		// TODO Auto-generated method stub
-		File[] files = file.listFiles(new FilenameFilter() {
+		File[] files = folder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				System.out.println(name);
 				return name.toLowerCase().endsWith(".strings");
@@ -650,16 +683,18 @@ public class MainPanel extends JPanel {
 		});
 
 		if (files != null && files.length > 0) {
-			List<Pair> list = IO.getInstance().readString(files[0]);
-			for (Pair pair : list) {
-				String[] s;
-				if (map.containsKey(pair.first)) {
-					s = map.get(pair.first);
-				} else {
-					s = new String[length];
-					map.put(pair.first, s);
+			for (File file : files) {
+				List<Pair> list = IO.getInstance().readString(file);
+				for (Pair pair : list) {
+					String[] s;
+					if (map.containsKey(pair.first)) {
+						s = map.get(pair.first);
+					} else {
+						s = new String[length];
+						map.put(pair.first, s);
+					}
+					s[index] = pair.second;
 				}
-				s[index] = pair.second;
 			}
 		}
 	}

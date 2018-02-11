@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.15.jar"/>
 	<classpathentry kind="lib" path="lib/weblaf-complete-1.29.jar"/>
 	<classpathentry kind="lib" path="lib/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/beautyeye_lnf.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
