@@ -102,6 +102,7 @@ public class MainPanel extends JPanel {
 		selectFolderAndroidRadioButton.setSelected(true);
 		selectFileRadioButton.setSelected(true);
 		// scalingFont();
+		setBackground(new Color(236,240,241));
 
 		handleUI();
 		updateGenerateFileLabel();
@@ -163,6 +164,7 @@ public class MainPanel extends JPanel {
 		
 		selectFolderAndroidButton.setHorizontalAlignment(SwingConstants.LEFT);
 		selectFolderSwiftButton.setHorizontalAlignment(SwingConstants.LEFT);
+		
 		
 	}
 
