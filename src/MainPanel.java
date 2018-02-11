@@ -673,7 +673,7 @@ public class MainPanel extends JPanel {
 						append(statusAreaScrollPane, statusArea,
 								String.format("All %s File created: %s\n\n",
 										folder == selectedAndroidFolder ? "XML" : "Strings",
-										selectedAndroidFolder.getAbsolutePath()));
+										folder.getAbsolutePath()));
 
 					toXmlButton.setEnabled(true);
 					toStringButton.setEnabled(true);
