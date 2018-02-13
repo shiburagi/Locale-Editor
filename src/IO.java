@@ -248,13 +248,14 @@ public class IO {
 				sheet.setColumnWidth(cellnum, 5000);
 				Cell cell = row.createCell(cellnum++);
 				XSSFCellStyle style = workbook.createCellStyle();
-				style.setFillForegroundColor(HSSFColor.AQUA.index);
+				style.setFillForegroundColor(HSSFColor.BLUE_GREY.index);
 				style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 				style.setAlignment(HorizontalAlignment.CENTER);
 
 				XSSFFont font = workbook.createFont();
 				font.setFontHeightInPoints((short) 12);
-				font.setBold(true);
+//				font.setBold(true);
+				font.setColor(HSSFColor.WHITE.index);
 				style.setFont(font);
 				style.setWrapText(true);
 
@@ -489,6 +490,7 @@ public class IO {
 													.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
 													.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
 													.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'")));
+
 				}
 				System.out.println();
 			}
