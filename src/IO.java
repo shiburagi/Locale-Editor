@@ -64,6 +64,11 @@ public class IO {
 					// System.out.println(node2.getNodeName() + " " +
 					// node2.getTextContent() + " " + node2.getNodeType());
 				}
+
+//				if (pair.second.endsWith("\"")) {
+//					pair.second = pair.second.substring(0, pair.second.length() - 1);
+//
+//				}
 				// pair.second.repla
 
 				// System.out.println(pair.first + " " + pair.second);
@@ -334,13 +339,16 @@ public class IO {
 					if (cellIterator.hasNext())
 						key = cellIterator.next().getStringCellValue();
 
-					System.out.println(key);
+					System.out.print(key + " = ");
 
 					List<String> list = new ArrayList<>();
 					while (cellIterator.hasNext()) {
 						Cell cell = cellIterator.next();
 						list.add(cell.getStringCellValue());
+						System.out.print(cell.getStringCellValue() + " | ");
+
 					}
+					System.out.println();
 					map.put(key, list.toArray(new String[list.size()]));
 				}
 			}
@@ -369,7 +377,7 @@ public class IO {
 			if (!folder.exists())
 				folder.mkdirs();
 			try {
-				writers[i] = new PrintWriter(new File(folder, filename==null?"strings.xml":filename+".xml"));
+				writers[i] = new PrintWriter(new File(folder, filename == null ? "strings.xml" : filename + ".xml"));
 				writers[i].println("<resources>");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -402,11 +410,12 @@ public class IO {
 					if (!translateable)
 						writers[i].print(" translatable=\"false\"");
 					writers[i].print(">");
-					writers[i].print(StringEscapeUtils.escapeXml11(values[i].replaceAll("\n", "\\\n"))
-							.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
-							.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
-							.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
-							.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'"));
+					writers[i].print(
+							StringEscapeUtils.escapeXml11(values[i].replaceAll("\n", "\\\n").replaceAll("(&amp;)", "&"))
+									.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
+									.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
+									.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
+									.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'"));
 					writers[i].println("</string>");
 				}
 				System.out.println();
@@ -438,8 +447,9 @@ public class IO {
 				folder.mkdirs();
 			try {
 
-				writers[i] = new PrintWriter(new File(folder, filename==null?"Localizable.strings":filename+".strings"));
-		
+				writers[i] = new PrintWriter(
+						new File(folder, filename == null ? "Localizable.strings" : filename + ".strings"));
+
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
