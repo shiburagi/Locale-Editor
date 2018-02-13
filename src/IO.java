@@ -64,6 +64,11 @@ public class IO {
 					// System.out.println(node2.getNodeName() + " " +
 					// node2.getTextContent() + " " + node2.getNodeType());
 				}
+
+//				if (pair.second.endsWith("\"")) {
+//					pair.second = pair.second.substring(0, pair.second.length() - 1);
+//
+//				}
 				// pair.second.repla
 
 				// System.out.println(pair.first + " " + pair.second);
@@ -99,7 +104,7 @@ public class IO {
 							String name = split[0].trim();
 							String value = split[1].trim();
 							pair.first = name.substring(1, name.length() - 1);
-							pair.second = value.substring(1, value.length() - 1);
+							pair.second = value.substring(1, value.length() - 2);
 							System.out.printf("first : %s , second : %s\n", pair.first, pair.second);
 							list.add(pair);
 
@@ -335,13 +340,16 @@ public class IO {
 					if (cellIterator.hasNext())
 						key = cellIterator.next().getStringCellValue();
 
-					System.out.println(key);
+					System.out.print(key + " = ");
 
 					List<String> list = new ArrayList<>();
 					while (cellIterator.hasNext()) {
 						Cell cell = cellIterator.next();
 						list.add(cell.getStringCellValue());
+						System.out.print(cell.getStringCellValue() + " | ");
+
 					}
+					System.out.println();
 					map.put(key, list.toArray(new String[list.size()]));
 				}
 			}
@@ -403,11 +411,12 @@ public class IO {
 					if (!translateable)
 						writers[i].print(" translatable=\"false\"");
 					writers[i].print(">");
-					writers[i].print(StringEscapeUtils.escapeXml11(values[i].replaceAll("\n", "\\\n"))
-							.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
-							.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
-							.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
-							.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'"));
+					writers[i].print(
+							StringEscapeUtils.escapeXml11(values[i].replaceAll("\n", "\\\n").replaceAll("(&amp;)", "&"))
+									.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
+									.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
+									.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
+									.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'"));
 					writers[i].println("</string>");
 				}
 				System.out.println();
@@ -469,12 +478,19 @@ public class IO {
 						continue;
 
 					System.out.print(values[i] + " , ");
-					writers[i].println(String.format("\"%s\" = \"%s\";", entry.getKey(),
-							StringEscapeUtils.escapeXml11(values[i].replaceAll("\n", "\\\n").replaceAll("\r", "\\\n"))
-									.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
-									.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
-									.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
-									.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'")));
+					writers[i]
+							.println(
+									String.format(
+											"\"%s\" = \"%s\";", entry
+													.getKey(),
+											StringEscapeUtils
+													.escapeXml11(
+															values[i].replaceAll("\n", "\\\n").replaceAll("\r", "\\\n").replaceAll("(&amp;)", "&"))
+													.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
+													.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
+													.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
+													.replaceAll("(&apos;)", "\\\\'").replaceAll("\\\\\\\\'", "\\\\'")));
+
 				}
 				System.out.println();
 			}
