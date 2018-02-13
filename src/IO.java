@@ -104,7 +104,7 @@ public class IO {
 							String name = split[0].trim();
 							String value = split[1].trim();
 							pair.first = name.substring(1, name.length() - 1);
-							pair.second = value.substring(1, value.length() - 1);
+							pair.second = value.substring(1, value.length() - 2);
 							System.out.printf("first : %s , second : %s\n", pair.first, pair.second);
 							list.add(pair);
 
@@ -484,7 +484,7 @@ public class IO {
 													.getKey(),
 											StringEscapeUtils
 													.escapeXml11(
-															values[i].replaceAll("\n", "\\\n").replaceAll("\r", "\\\n"))
+															values[i].replaceAll("\n", "\\\n").replaceAll("\r", "\\\n").replaceAll("(&amp;)", "&"))
 													.replaceAll("(&lt;b&gt;)", "<b>").replaceAll("(&lt;/b&gt;)", "</b>")
 													.replaceAll("(&lt;i&gt;)", "<i>").replaceAll("(&lt;/i&gt;)", "</i>")
 													.replaceAll("(&lt;u&gt;)", "<u>").replaceAll("(&lt;/u&gt;)", "</u>")
